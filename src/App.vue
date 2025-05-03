@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import Todos from './components/Todos.vue'
+import Camera from './components/Camera.vue'
 </script>
 
 <template>
   <main>
-    <Todos />
+    <Camera />
   </main>
 </template>
-
