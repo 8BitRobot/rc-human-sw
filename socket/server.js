@@ -18,8 +18,8 @@ const wss = new WebSocket.Server({ server });
 
 console.log(`WebSocket signaling server starting on port ${port}`);
 
-let offer;
-let answer;
+let offerMessages = [];
+let answerMessages = [];
 
 // WebSocket server event listeners
 wss.on('connection', (ws) => {
@@ -30,24 +30,28 @@ wss.on('connection', (ws) => {
     message = JSON.parse(message);
     console.log('Message received from client:', message);
 
-    if (message.type === 'offer') {
+    if (message.origin === 'camera' && (message.messageType === 'offer' || message.messageType === 'ice-candidate')) {
       // Store the offer from the client
-      offer = message;
-      console.log('Offer received:', offer);
+      offerMessages.push(message);
+      console.log('Offer received:', message);
     }
-    if (message.type === 'answer') {
+    if (message.origin === 'computer' && (message.messageType === 'answer' || message.messageType === 'ice-candidate')) {
       // Store the answer from the client
-      answer = message;
-      console.log('Answer received:', answer);
+      answerMessages.push(message);
+      console.log('Answer received:', message);
     }
-    if (message.type === 'poll') {
-      if (offer && message.origin === 'computer') {
-        ws.send(JSON.stringify(offer));
-        console.log('Offer sent to computer:', offer);
+    if (message.messageType === 'poll') {
+      if (message.origin === 'computer') {
+        for (const offer of offerMessages) {
+          // Send the stored offer to the computer
+          ws.send(JSON.stringify(offer));
+        }
       }
-      if (answer && message.origin === 'camera') {
-        ws.send(JSON.stringify(answer));
-        console.log('Answer sent to camera:', answer);
+      if (message.origin === 'camera') {
+        for (const answer of answerMessages) {
+          // Send the stored answer to the camera
+          ws.send(JSON.stringify(answer));
+        }
       }
     }
   });
