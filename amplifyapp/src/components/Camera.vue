@@ -57,13 +57,12 @@ onMounted(() => {
   const constraints = {
     audio: false,
     video: {
-      facingMode: 'user',
+      facingMode: 'environment',
       width: { ideal: 1280 },
       height: { ideal: 720 },
     },
   };
 
-  navigator.mediaDevices
   navigator.mediaDevices
     .getUserMedia(constraints)
     .then((stream) => {
@@ -129,6 +128,13 @@ async function makeCall() {
 }
 
 </script>
+
+<style scoped>
+#gum-local {
+  width: 320;
+  height: 180;
+}
+</style>
 
 <template>
   <main>
