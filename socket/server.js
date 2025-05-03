@@ -33,11 +33,11 @@ wss.on('connection', (ws) => {
     // Check if the message is a connection request
 
     if (message.messageType === 'init') {
-      if (message.origin === 'camera') {
+      if (message.origin === 'camera' && !cameraClient) {
         cameraClient = ws;
         console.log('Camera client connected');
         return;
-      } else if (message === 'computer') {
+      } else if (message === 'computer' && !computerClient) {
         computerClient = ws;
         console.log('Computer client connected');
         return;

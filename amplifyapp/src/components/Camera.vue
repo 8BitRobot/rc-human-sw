@@ -8,7 +8,7 @@ let localStream: MediaStream;
 let remoteStream: MediaStream;
 
 onMounted(() => {
-  signalingChannel = new WebSocket('ws://ec2-35-94-57-69.us-west-2.compute.amazonaws.com:8080');
+  signalingChannel = new WebSocket('wss://rc-human-signal-p2p-env.eba-82fuxzdy.us-west-2.elasticbeanstalk.com/');
   signalingChannel.onopen = () => {
     console.log('WebSocket connection established');
     signalingChannel.send(JSON.stringify({ messageType: 'init', origin: 'camera' }));
