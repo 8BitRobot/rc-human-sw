@@ -20,6 +20,9 @@ onMounted(() => {
     if (data.messageType === 'ping') {
       signalingChannel.send(JSON.stringify({ messageType: 'pong', origin: 'camera' }));
     }
+    if (data.messageType === 'answer') {
+      peerConnection.setRemoteDescription(data.answer);
+    }
   };
   signalingChannel.onclose = () => {
     console.log('WebSocket connection closed');
@@ -53,10 +56,9 @@ window.onbeforeunload = () => {
   signalingChannel.close();
 };
 
-
 async function makeCall() {
   const configuration = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}]}
-  const peerConnection = new RTCPeerConnection(configuration);
+  peerConnection = new RTCPeerConnection(configuration);
 
   const offer = await peerConnection.createOffer();
   await peerConnection.setLocalDescription(offer);

@@ -18,26 +18,11 @@ const wss = new WebSocket.Server({ server });
 
 // Keep track of connected clients
 let cameraClient;
+let cameraClientPingInterval;
 let computerClient;
+let computerClientPingInterval;
 
 console.log(`WebSocket signaling server starting on port ${port}`);
-
-setInterval(() => {
-  console.log('Sending ping to camera client');
-  if (cameraClient) {
-    cameraClient.send(JSON.stringify({ type: 'ping' }));
-  } else {
-    console.log('No camera client connected');
-  }
-}, 5000);
-setInterval(() => {
-  console.log('Sending ping to computer client');
-  if (computerClient) {
-    computerClient.send(JSON.stringify({ type: 'ping' }));
-  } else {
-    console.log('No computer client connected');
-  }
-}, 5000);
 
 // WebSocket server event listeners
 wss.on('connection', (ws) => {
@@ -45,23 +30,35 @@ wss.on('connection', (ws) => {
 
   // Listen for messages from this specific client
   ws.on('message', (message) => {
+    message = JSON.parse(message);
     console.log('Message received from client:', message);
 
-    console.log('Computer client:', computerClient);
-    console.log('Camera client:', cameraClient);
-
-    // Check if the client is a camera or computer
-    message = JSON.parse(message);
     // Check if the message is a connection request
 
     if (message.messageType === 'init') {
       if (message.origin === 'camera') {
         cameraClient = ws;
         console.log('Camera client connected');
+        cameraClientPingInterval = setInterval(() => {
+          console.log('Sending ping to camera client');
+          if (cameraClient) {
+            cameraClient.send(JSON.stringify({ type: 'ping' }));
+          } else {
+            console.log('No camera client connected');
+          }
+        }, 5000);
         return;
-      } else if (message === 'computer') {
+      } else if (message.origin === 'computer') {
         computerClient = ws;
         console.log('Computer client connected');
+        computerClientPingInterval = setInterval(() => {
+          console.log('Sending ping to computer client');
+          if (computerClient) {
+            computerClient.send(JSON.stringify({ type: 'ping' }));
+          } else {
+            console.log('No computer client connected');
+          }
+        }, 5000);
         return;
       }
     }
@@ -70,10 +67,12 @@ wss.on('connection', (ws) => {
       if (message.origin === 'camera') {
         cameraClient = null;
         console.log('Camera client disconnected');
+        clearInterval(cameraClientPingInterval);
         return;
       } else if (message.origin === 'computer') {
         computerClient = null;
         console.log('Computer client disconnected');
+        clearInterval(computerClientPingInterval);
         return;
       }
     }
@@ -106,7 +105,16 @@ wss.on('connection', (ws) => {
 
   // Listen for when this client disconnects
   ws.on('close', () => {
-    console.log('Client disconnected');
+    // Clear the ping interval for this client
+    if (ws === cameraClient) {
+      clearInterval(cameraClientPingInterval);
+      cameraClient = null;
+      console.log('Camera client disconnected');
+    } else if (ws === computerClient) {
+      clearInterval(computerClientPingInterval);
+      computerClient = null;
+      console.log('Computer client disconnected');
+    }
   });
 
   // Listen for errors with this client's connection
