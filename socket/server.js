@@ -22,12 +22,34 @@ let computerClient;
 
 console.log(`WebSocket signaling server starting on port ${port}`);
 
+setInterval(() => {
+  console.log('Sending ping to camera client');
+  if (cameraClient) {
+    cameraClient.send(JSON.stringify({ type: 'ping' }));
+  } else {
+    console.log('No camera client connected');
+  }
+}, 5000);
+setInterval(() => {
+  console.log('Sending ping to computer client');
+  if (computerClient) {
+    computerClient.send(JSON.stringify({ type: 'ping' }));
+  } else {
+    console.log('No computer client connected');
+  }
+}, 5000);
+
 // WebSocket server event listeners
 wss.on('connection', (ws) => {
   console.log('Client connected');
 
   // Listen for messages from this specific client
   ws.on('message', (message) => {
+    console.log('Message received from client:', message);
+
+    console.log('Computer client:', computerClient);
+    console.log('Camera client:', cameraClient);
+
     // Check if the client is a camera or computer
     message = JSON.parse(message);
     // Check if the message is a connection request
@@ -56,7 +78,17 @@ wss.on('connection', (ws) => {
       }
     }
 
-    console.log('Message received:', message);
+    if (message.messageType === 'pong') {
+      console.log(`Pong received from client ${message.origin}`);
+      if (message.origin === 'camera') {
+        cameraClient = ws;
+        return;
+      }
+      if (message.origin === 'computer') {
+        computerClient = ws;
+        return;
+      }
+    }
 
     // If the message is from the camera, forward it to the computer
     if (cameraClient && computerClient) {
@@ -70,9 +102,6 @@ wss.on('connection', (ws) => {
     } else {
       console.log('No clients connected to forward messages to');
     }
-
-    // Log the message for debugging
-    console.log(`Received message from ${message.origin}:`, message);
   });
 
   // Listen for when this client disconnects

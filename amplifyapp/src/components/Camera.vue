@@ -15,6 +15,11 @@ onMounted(() => {
   };
   signalingChannel.onmessage = (event) => {
     console.log('Message from server:', JSON.parse(event.data));
+    const data = JSON.parse(event.data);
+
+    if (data.messageType === 'ping') {
+      signalingChannel.send(JSON.stringify({ messageType: 'pong', origin: 'camera' }));
+    }
   };
   signalingChannel.onclose = () => {
     console.log('WebSocket connection closed');
