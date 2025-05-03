@@ -17,45 +17,44 @@ const server = http.createServer((req, res) => {
 const wss = new WebSocket.Server({ server });
 
 // Keep track of connected clients
-const clients = new Set();
+let cameraClient;
+let computerClient;
 
 console.log(`WebSocket signaling server starting on port ${port}`);
 
 // WebSocket server event listeners
 wss.on('connection', (ws) => {
   console.log('Client connected');
-  clients.add(ws);
 
   // Listen for messages from this specific client
   ws.on('message', (message) => {
-    // Assuming messages are text (like JSON strings for signaling)
-    const messageString = message.toString();
-    console.log(`Received message: ${messageString}`);
+    // Check if the client is a camera or computer
+    message = JSON.parse(message);
+    // Check if the message is a connection request
 
-    // Broadcast the message to all other connected clients
-    clients.forEach((client) => {
-      // Check if the client is still connected and is not the sender
-      if (client !== ws && client.readyState === WebSocket.OPEN) {
-        try {
-          client.send(messageString);
-          console.log(`Forwarded message to a client`);
-        } catch (error) {
-          console.error('Error sending message to client:', error);
-        }
+    if (message.messageType === 'init') {
+      if (message.origin === 'camera') {
+        cameraClient = ws;
+        console.log('Camera client connected');
+        return;
+      } else if (message === 'computer') {
+        computerClient = ws;
+        console.log('Computer client connected');
+        return;
       }
-    });
+    }
+
+    console.log(message);
   });
 
   // Listen for when this client disconnects
   ws.on('close', () => {
     console.log('Client disconnected');
-    clients.delete(ws); // Remove the client from the set
   });
 
   // Listen for errors with this client's connection
   ws.on('error', (error) => {
     console.error(`WebSocket error: ${error}`);
-    clients.delete(ws); // Attempt to remove on error as well
   });
 
   // Send a confirmation back to the newly connected client (optional)
