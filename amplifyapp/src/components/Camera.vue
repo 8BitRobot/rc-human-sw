@@ -13,15 +13,13 @@ onMounted(() => {
     console.log('WebSocket connection established');
     signalingChannel.send(JSON.stringify({ messageType: 'init', origin: 'camera' }));
   };
-  signalingChannel.onmessage = (event) => {
+  signalingChannel.onmessage = async (event) => {
     console.log('Message from server:', JSON.parse(event.data));
     const data = JSON.parse(event.data);
 
-    if (data.messageType === 'ping') {
-      signalingChannel.send(JSON.stringify({ messageType: 'pong', origin: 'camera' }));
-    }
     if (data.messageType === 'answer') {
-      peerConnection.setRemoteDescription(data.answer);
+      await peerConnection.setRemoteDescription(data.answer);
+      console.log(peerConnection);
     }
   };
   signalingChannel.onclose = () => {

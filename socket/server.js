@@ -16,13 +16,10 @@ const server = http.createServer((req, res) => {
 // Create a WebSocket server instance
 const wss = new WebSocket.Server({ server });
 
-// Keep track of connected clients
-let cameraClient;
-let cameraClientPingInterval;
-let computerClient;
-let computerClientPingInterval;
-
 console.log(`WebSocket signaling server starting on port ${port}`);
+
+let offer;
+let answer;
 
 // WebSocket server event listeners
 wss.on('connection', (ws) => {
@@ -33,87 +30,25 @@ wss.on('connection', (ws) => {
     message = JSON.parse(message);
     console.log('Message received from client:', message);
 
-    // Check if the message is a connection request
-
-    if (message.messageType === 'init') {
-      if (message.origin === 'camera') {
-        cameraClient = ws;
-        console.log('Camera client connected');
-        cameraClientPingInterval = setInterval(() => {
-          console.log('Sending ping to camera client');
-          if (cameraClient) {
-            cameraClient.send(JSON.stringify({ type: 'ping' }));
-          } else {
-            console.log('No camera client connected');
-          }
-        }, 5000);
-        return;
-      } else if (message.origin === 'computer') {
-        computerClient = ws;
-        console.log('Computer client connected');
-        computerClientPingInterval = setInterval(() => {
-          console.log('Sending ping to computer client');
-          if (computerClient) {
-            computerClient.send(JSON.stringify({ type: 'ping' }));
-          } else {
-            console.log('No computer client connected');
-          }
-        }, 5000);
-        return;
-      }
+    if (message.type === 'offer') {
+      // Store the offer from the client
+      offer = message;
+      console.log('Offer received:', offer);
     }
-
-    if (message.messageType === 'close') {
-      if (message.origin === 'camera') {
-        cameraClient = null;
-        console.log('Camera client disconnected');
-        clearInterval(cameraClientPingInterval);
-        return;
-      } else if (message.origin === 'computer') {
-        computerClient = null;
-        console.log('Computer client disconnected');
-        clearInterval(computerClientPingInterval);
-        return;
-      }
+    if (message.type === 'answer') {
+      // Store the answer from the client
+      answer = message;
+      console.log('Answer received:', answer);
     }
-
-    if (message.messageType === 'pong') {
-      console.log(`Pong received from client ${message.origin}`);
-      if (message.origin === 'camera') {
-        cameraClient = ws;
-        return;
+    if (message.type === 'poll') {
+      if (offer && message.origin === 'computer') {
+        ws.send(JSON.stringify(offer));
+        console.log('Offer sent to computer:', offer);
       }
-      if (message.origin === 'computer') {
-        computerClient = ws;
-        return;
+      if (answer && message.origin === 'camera') {
+        ws.send(JSON.stringify(answer));
+        console.log('Answer sent to camera:', answer);
       }
-    }
-
-    // If the message is from the camera, forward it to the computer
-    if (cameraClient && computerClient) {
-      if (message.origin === 'camera') {
-        console.log('Forwarding message from camera to computer');
-        computerClient.send(JSON.stringify(message));
-      } else if (message.origin === 'computer') {
-        console.log('Forwarding message from computer to camera');
-        cameraClient.send(JSON.stringify(message));
-      }
-    } else {
-      console.log('No clients connected to forward messages to');
-    }
-  });
-
-  // Listen for when this client disconnects
-  ws.on('close', () => {
-    // Clear the ping interval for this client
-    if (ws === cameraClient) {
-      clearInterval(cameraClientPingInterval);
-      cameraClient = null;
-      console.log('Camera client disconnected');
-    } else if (ws === computerClient) {
-      clearInterval(computerClientPingInterval);
-      computerClient = null;
-      console.log('Computer client disconnected');
     }
   });
 

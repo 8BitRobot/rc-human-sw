@@ -2,6 +2,7 @@
 import { onMounted } from 'vue';
 
 let signalingChannel: WebSocket;
+let peerConnection: RTCPeerConnection;
 
 async function receiveCall(data: {
   'messageType': string;
@@ -9,14 +10,17 @@ async function receiveCall(data: {
   'origin': string;
 }) {
   const configuration = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}]}
-  const peerConnection = new RTCPeerConnection(configuration);
+  peerConnection = new RTCPeerConnection(configuration);
 
   const offer = data.offer;
   await peerConnection.setRemoteDescription(offer);
 
   const answer = await peerConnection.createAnswer();
   await peerConnection.setLocalDescription(answer);
+
+  console.log('Sending answer to server:', answer);
   signalingChannel.send(JSON.stringify({'messageType': 'answer', 'answer': answer, 'origin': 'camera'}));
+  console.log(peerConnection);
 }
 
 
