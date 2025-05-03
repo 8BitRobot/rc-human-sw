@@ -68,7 +68,7 @@ async function receiveCall(data: {
 
 onMounted(() => {
   remoteVideo = document.querySelector("#remoteVideo") as HTMLVideoElement; // Remote video element
-  signalingChannel = new WebSocket('wss://rc-human-signal-p2p-env.eba-82fuxzdy.us-west-2.elasticbeanstalk.com/');
+  signalingChannel = new WebSocket('wss://rchumanws.org');
   signalingChannel.onopen = () => {
     console.log('WebSocket connection established');
     signalingChannel.send(JSON.stringify({ messageType: 'init', origin: 'computer' }));
