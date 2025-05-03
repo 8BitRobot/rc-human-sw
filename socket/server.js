@@ -33,18 +33,46 @@ wss.on('connection', (ws) => {
     // Check if the message is a connection request
 
     if (message.messageType === 'init') {
-      if (message.origin === 'camera' && !cameraClient) {
+      if (message.origin === 'camera') {
         cameraClient = ws;
         console.log('Camera client connected');
         return;
-      } else if (message === 'computer' && !computerClient) {
+      } else if (message === 'computer') {
         computerClient = ws;
         console.log('Computer client connected');
         return;
       }
     }
 
-    console.log(message);
+    if (message.messageType === 'close') {
+      if (message.origin === 'camera') {
+        cameraClient = null;
+        console.log('Camera client disconnected');
+        return;
+      } else if (message.origin === 'computer') {
+        computerClient = null;
+        console.log('Computer client disconnected');
+        return;
+      }
+    }
+
+    console.log('Message received:', message);
+
+    // If the message is from the camera, forward it to the computer
+    if (cameraClient && computerClient) {
+      if (message.origin === 'camera') {
+        console.log('Forwarding message from camera to computer');
+        computerClient.send(JSON.stringify(message));
+      } else if (message.origin === 'computer') {
+        console.log('Forwarding message from computer to camera');
+        cameraClient.send(JSON.stringify(message));
+      }
+    } else {
+      console.log('No clients connected to forward messages to');
+    }
+
+    // Log the message for debugging
+    console.log(`Received message from ${message.origin}:`, message);
   });
 
   // Listen for when this client disconnects
