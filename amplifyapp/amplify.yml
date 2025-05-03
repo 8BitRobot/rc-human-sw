@@ -4,6 +4,7 @@ applications:
       phases:
         preBuild:
           commands:
+            - nvm install
             - nvm use
         build:
           commands:
@@ -13,6 +14,7 @@ applications:
       phases:
         preBuild:
           commands:
+            - nvm install
             - nvm use
         build:
           commands:
