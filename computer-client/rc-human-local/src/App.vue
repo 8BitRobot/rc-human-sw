@@ -158,7 +158,7 @@ function handleKeydown(event: any) {
     if (!buttonStates.leftArrow && !buttonStates.rightArrow) {
       buttonStates.leftArrow = true;
       document.getElementById('left-arrow-button')?.classList.add('clicked');
-      // serialChannel.send('6');
+      serialChannel.send('6');
       return;
     }
 
@@ -166,12 +166,12 @@ function handleKeydown(event: any) {
 
     buttonStates.leftArrow = false;
     document.getElementById('left-arrow-button')?.classList.remove('clicked');
-    // serialChannel.send('8');
+    serialChannel.send('8');
   } else if (event.key === 'd') {
     if (!buttonStates.leftArrow && !buttonStates.rightArrow) {
       buttonStates.rightArrow = true;
       document.getElementById('right-arrow-button')?.classList.add('clicked');
-      // serialChannel.send('7');
+      serialChannel.send('7');
       return;
     }
 
@@ -179,29 +179,29 @@ function handleKeydown(event: any) {
 
     buttonStates.rightArrow = false;
     document.getElementById('right-arrow-button')?.classList.remove('clicked');
-    // serialChannel.send('8');
+    serialChannel.send('8');
   } else if (event.key === 'j') {
     if (!buttonStates.leftArm) {
       buttonStates.leftArm = true;
       document.getElementById('left-arm-button')?.classList.add('clicked');
-      // serialChannel.send('2');
+      serialChannel.send('2');
       return;
     }
 
     buttonStates.leftArm = false;
     document.getElementById('left-arm-button')?.classList.remove('clicked');
-    // serialChannel.send('3');
+    serialChannel.send('3');
   } else if (event.key === 'l') {
     if (!buttonStates.rightArm) {
       buttonStates.rightArm = true;
       document.getElementById('right-arm-button')?.classList.add('clicked');
-      // serialChannel.send('4');
+      serialChannel.send('4');
       return;
     }
 
     buttonStates.rightArm = false;
     document.getElementById('right-arm-button')?.classList.remove('clicked');
-    // serialChannel.send('5');
+    serialChannel.send('5');
   } else if (event.key === 'Escape') {
     console.log('Resetting the connection');
     signalingChannel.send(JSON.stringify({ messageType: 'clear', origin: 'computer' }));
