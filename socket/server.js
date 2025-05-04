@@ -21,6 +21,11 @@ console.log(`WebSocket signaling server starting on port ${port}`);
 let offerMessages = [];
 let answerMessages = [];
 
+function clearMessages() {
+  offerMessages = [];
+  answerMessages = [];
+}
+
 // WebSocket server event listeners
 wss.on('connection', (ws) => {
   console.log('Client connected');
@@ -29,6 +34,12 @@ wss.on('connection', (ws) => {
   ws.on('message', (message) => {
     message = JSON.parse(message);
     console.log('Message received from client:', message);
+
+    if (message.messageType === 'clear') {
+      // Clear the stored messages
+      clearMessages();
+      console.log('Stored messages cleared');
+    }
 
     if (message.origin === 'camera' && (message.messageType === 'offer' || message.messageType === 'ice-candidate')) {
       // Store the offer from the client

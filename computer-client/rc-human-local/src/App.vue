@@ -128,6 +128,9 @@ function handleKeyup(event: any) {
     document.getElementById('left-arrow-button')?.classList.remove('clicked');
   } else if (event.key === 'ArrowRight') {
     document.getElementById('right-arrow-button')?.classList.remove('clicked');
+  } else if (event.key === 'Escape') {
+    console.log('Resetting the connection');
+    signalingChannel.send(JSON.stringify({ messageType: 'clear', origin: 'computer' }));
   }
 }
 
@@ -173,6 +176,10 @@ main {
   &.clicked {
     background-color: #dc8914;
   }
+}
+
+#remoteVideo {
+  transform: rotate(-90deg);
 }
 
 </style>
