@@ -129,24 +129,79 @@ onMounted(() => {
   };
 
   window.addEventListener('keydown', handleKeydown);
-  window.addEventListener('keyup', handleKeyup);
 });
 
-function handleKeydown(event: any) {
-  if (event.key === 'a') {
-    document.getElementById('left-arrow-button')?.classList.add('clicked');
-    serialChannel.send('1');
-  } else if (event.key === 'd') {
-    document.getElementById('right-arrow-button')?.classList.add('clicked');
-    serialChannel.send('0');
-  }
-}
+const buttonStates = {
+  leftArrow: false,
+  rightArrow: false,
+  leftArm: false,
+  rightArm: false,
+};
 
-function handleKeyup(event: any) {
+window.buttonStates = buttonStates;
+
+function handleKeydown(event: any) {
+  console.log(buttonStates);
+  /* Command Legend
+    * Note: A and B are like Left and Right
+    * 0 - LED On
+    * 1 - LED Off
+    * 2 - Relay A On
+    * 3 - Relay A Off
+    * 4 - Relay B On
+    * 5 - Relay B Off
+    * 6 - HBridge A On, B Off
+    * 7 - HBridge A Off, B On
+    * 8 - HBridge A & B Off
+    */
   if (event.key === 'a') {
+    if (!buttonStates.leftArrow && !buttonStates.rightArrow) {
+      buttonStates.leftArrow = true;
+      document.getElementById('left-arrow-button')?.classList.add('clicked');
+      // serialChannel.send('6');
+      return;
+    }
+
+    if (buttonStates.rightArrow) return;
+
+    buttonStates.leftArrow = false;
     document.getElementById('left-arrow-button')?.classList.remove('clicked');
+    // serialChannel.send('8');
   } else if (event.key === 'd') {
+    if (!buttonStates.leftArrow && !buttonStates.rightArrow) {
+      buttonStates.rightArrow = true;
+      document.getElementById('right-arrow-button')?.classList.add('clicked');
+      // serialChannel.send('7');
+      return;
+    }
+
+    if (buttonStates.leftArrow) return;
+
+    buttonStates.rightArrow = false;
     document.getElementById('right-arrow-button')?.classList.remove('clicked');
+    // serialChannel.send('8');
+  } else if (event.key === 'j') {
+    if (!buttonStates.leftArm) {
+      buttonStates.leftArm = true;
+      document.getElementById('left-arm-button')?.classList.add('clicked');
+      // serialChannel.send('2');
+      return;
+    }
+
+    buttonStates.leftArm = false;
+    document.getElementById('left-arm-button')?.classList.remove('clicked');
+    // serialChannel.send('3');
+  } else if (event.key === 'l') {
+    if (!buttonStates.rightArm) {
+      buttonStates.rightArm = true;
+      document.getElementById('right-arm-button')?.classList.add('clicked');
+      // serialChannel.send('4');
+      return;
+    }
+
+    buttonStates.rightArm = false;
+    document.getElementById('right-arm-button')?.classList.remove('clicked');
+    // serialChannel.send('5');
   } else if (event.key === 'Escape') {
     console.log('Resetting the connection');
     signalingChannel.send(JSON.stringify({ messageType: 'clear', origin: 'computer' }));
@@ -155,7 +210,6 @@ function handleKeyup(event: any) {
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown);
-  window.removeEventListener('keyup', handleKeyup);
 });
 
 window.onbeforeunload = () => {
@@ -179,6 +233,14 @@ main {
   flex-flow: row;
   justify-content: space-between;
   align-items: center;
+}
+
+.arrow-button-container {
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
 }
 
 .side-arrow-button {
@@ -206,14 +268,16 @@ main {
 <template>
   <main>
     <div id="controls-container">
-      <div id="left-arrow-button-container">
-        <button id="left-arrow-button" class="arrow-button side-arrow-button">&lt;</button>
+      <div id="left-arrow-button-container" class="arrow-button-container">
+        <button id="left-arrow-button" class="side-arrow-button">&lt;</button>
+        <button id="left-arm-button" class="side-arrow-button">🫲</button>
       </div>
       <div id="remote-video-container">
         <video id="remoteVideo" autoplay playsinline></video>
       </div>
-      <div id="right-arrow-button-container">
-        <button id="right-arrow-button" class="arrow-button side-arrow-button">&gt;</button>
+      <div id="right-arrow-button-container" class="arrow-button-container">
+        <button id="right-arrow-button" class="side-arrow-button">&gt;</button>
+        <button id="right-arm-button" class="side-arrow-button">🫱</button>
       </div>
     </div>
   </main>
