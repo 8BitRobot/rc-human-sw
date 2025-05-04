@@ -175,32 +175,16 @@ main {
   }
 }
 
-#remote-video-container {
-  position: absolute;
-  z-index: 1;
-  left: 26%;
-  top: -25%;
-}
-
-#remoteVideo {
-  transform: rotate(-90deg);
-}
-
-#video-overlay {
-  background-color: #00000070;
-}
-
 </style>
 
 <template>
   <main>
-    <div id="remote-video-container">
-      <div id="video-overlay"></div>
-      <video id="remoteVideo" autoplay playsinline></video>
-    </div>
     <div id="controls-container">
       <div id="left-arrow-button-container">
         <button id="left-arrow-button" class="arrow-button side-arrow-button">&lt;</button>
+      </div>
+      <div id="remote-video-container">
+        <video id="remoteVideo" autoplay playsinline></video>
       </div>
       <div id="right-arrow-button-container">
         <button id="right-arrow-button" class="arrow-button side-arrow-button">&gt;</button>

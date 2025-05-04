@@ -50,8 +50,8 @@ onMounted(() => {
     audio: false,
     video: {
       facingMode: 'environment',
+      aspectRatio: 1,
       width: { ideal: 720 },
-      height: { ideal: 1280 },
     },
   };
 
