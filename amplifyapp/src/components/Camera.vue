@@ -53,7 +53,7 @@ onMounted(() => {
     console.error('WebSocket error:', error);
   };
 
-  const video = document.querySelector('#gum-local') as HTMLVideoElement;
+  const video = document.querySelector('#camera-feed') as HTMLVideoElement;
   const constraints = {
     audio: false,
     video: {
@@ -130,16 +130,41 @@ async function makeCall() {
 </script>
 
 <style scoped>
-#gum-local {
-  width: 320;
-  height: 180;
+#container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  height: 100vh;
+}
+#video-container {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#camera-feed {
+  width: 80%;
+  height: auto;
+}
+#button-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#button {
+  width: 80%;
+  height: 50px;
 }
 </style>
 
 <template>
   <main>
-    <button @click="makeCall">Make Call</button>
-    <h1>Camera</h1>
-    <video id="gum-local" autoplay playsinline></video>
+    <div id="container">
+      <div id="video-container"><video id="camera-feed" autoplay playsinline></video></div>
+      <div id="button-container"><button id="button" @click="makeCall">Connect</button></div>
+    </div>
   </main>
 </template>
