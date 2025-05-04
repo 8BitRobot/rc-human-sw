@@ -2,6 +2,7 @@
 import { onMounted, onUnmounted } from 'vue';
 
 let signalingChannel: WebSocket;
+let serialChannel: WebSocket;
 let peerConnection: RTCPeerConnection;
 let polling: any;
 
@@ -69,6 +70,8 @@ async function receiveCall(data: {
 onMounted(() => {
   remoteVideo = document.querySelector("#remoteVideo") as HTMLVideoElement; // Remote video element
   signalingChannel = new WebSocket('wss://rchumanws.org');
+  serialChannel = new WebSocket('ws://localhost:8765');
+
   signalingChannel.onopen = () => {
     console.log('WebSocket connection established');
     signalingChannel.send(JSON.stringify({ messageType: 'init', origin: 'computer' }));
@@ -77,6 +80,10 @@ onMounted(() => {
       signalingChannel.send(JSON.stringify({ messageType: 'poll', origin: 'computer' }));
     }, 5000);
   };
+  serialChannel.onopen = () => {
+    console.log('Serial WebSocket connection established');
+  };
+
   signalingChannel.onmessage = async (event) => {
     const data = JSON.parse(event.data);
     console.log('Message from server:', data);
@@ -103,12 +110,22 @@ onMounted(() => {
         }
     }
   };
+  serialChannel.onmessage = (event) => {
+    console.log('Serial message from server:', event.data);
+  };
 
   signalingChannel.onclose = () => {
     console.log('WebSocket connection closed');
   };
+  serialChannel.onclose = () => {
+    console.log('Serial WebSocket connection closed');
+  };
+
   signalingChannel.onerror = (error) => {
     console.error('WebSocket error:', error);
+  };
+  serialChannel.onerror = (error) => {
+    console.error('Serial WebSocket error:', error);
   };
 
   window.addEventListener('keydown', handleKeydown);
@@ -116,17 +133,19 @@ onMounted(() => {
 });
 
 function handleKeydown(event: any) {
-  if (event.key === 'ArrowLeft') {
+  if (event.key === 'a') {
     document.getElementById('left-arrow-button')?.classList.add('clicked');
-  } else if (event.key === 'ArrowRight') {
+    serialChannel.send('1');
+  } else if (event.key === 'd') {
     document.getElementById('right-arrow-button')?.classList.add('clicked');
+    serialChannel.send('0');
   }
 }
 
 function handleKeyup(event: any) {
-  if (event.key === 'ArrowLeft') {
+  if (event.key === 'a') {
     document.getElementById('left-arrow-button')?.classList.remove('clicked');
-  } else if (event.key === 'ArrowRight') {
+  } else if (event.key === 'd') {
     document.getElementById('right-arrow-button')?.classList.remove('clicked');
   } else if (event.key === 'Escape') {
     console.log('Resetting the connection');
