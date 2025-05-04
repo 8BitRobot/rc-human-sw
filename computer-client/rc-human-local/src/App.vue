@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, onUnmounted } from 'vue';
 
 let signalingChannel: WebSocket;
 let peerConnection: RTCPeerConnection;
@@ -110,6 +110,30 @@ onMounted(() => {
   signalingChannel.onerror = (error) => {
     console.error('WebSocket error:', error);
   };
+
+  window.addEventListener('keydown', handleKeydown);
+  window.addEventListener('keyup', handleKeyup);
+});
+
+function handleKeydown(event: any) {
+  if (event.key === 'ArrowLeft') {
+    document.getElementById('left-arrow-button')?.classList.add('clicked');
+  } else if (event.key === 'ArrowRight') {
+    document.getElementById('right-arrow-button')?.classList.add('clicked');
+  }
+}
+
+function handleKeyup(event: any) {
+  if (event.key === 'ArrowLeft') {
+    document.getElementById('left-arrow-button')?.classList.remove('clicked');
+  } else if (event.key === 'ArrowRight') {
+    document.getElementById('right-arrow-button')?.classList.remove('clicked');
+  }
+}
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown);
+  window.removeEventListener('keyup', handleKeyup);
 });
 
 window.onbeforeunload = () => {
@@ -119,9 +143,68 @@ window.onbeforeunload = () => {
 
 </script>
 
+<style scoped lang="scss">
+main {
+  width: 100vw;
+  height: 100vh;
+}
+#controls-container {
+  position:relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-flow: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.side-arrow-button {
+  margin: 30px;
+  background-color: #890a23;
+  outline: none;
+  border: none;
+  padding: 100px 30px;
+  border-radius: 12px;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+
+  &.clicked {
+    background-color: #dc8914;
+  }
+}
+
+#remote-video-container {
+  position: absolute;
+  z-index: 1;
+  left: 26%;
+  top: -25%;
+}
+
+#remoteVideo {
+  transform: rotate(-90deg);
+}
+
+#video-overlay {
+  background-color: #00000070;
+}
+
+</style>
+
 <template>
   <main>
-    <h1> test </h1>
-    <video id="remoteVideo" autoplay playsinline></video>
+    <div id="remote-video-container">
+      <div id="video-overlay"></div>
+      <video id="remoteVideo" autoplay playsinline></video>
+    </div>
+    <div id="controls-container">
+      <div id="left-arrow-button-container">
+        <button id="left-arrow-button" class="arrow-button side-arrow-button">&lt;</button>
+      </div>
+      <div id="right-arrow-button-container">
+        <button id="right-arrow-button" class="arrow-button side-arrow-button">&gt;</button>
+      </div>
+    </div>
   </main>
 </template>

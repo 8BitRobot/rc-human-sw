@@ -24,7 +24,7 @@ onMounted(() => {
         await peerConnection.setRemoteDescription(data.answer);
         console.log('Answer received and set as remote description');
         // No more polling needed after getting answer and exchanging candidates
-        // clearInterval(polling); // Ensure polling is cleared here if used
+        clearInterval(polling); // Ensure polling is cleared here if used
     } else if (data.messageType === 'ice-candidate') {
         // Handle incoming ICE candidates
         console.log('Received ICE candidate:', data.candidate);
@@ -35,14 +35,6 @@ onMounted(() => {
         } catch (e) {
             console.error('Failed to add ICE candidate:', e);
         }
-    }
-
-    if (data.messageType === 'answer' && peerConnection) {
-      await peerConnection.setRemoteDescription(data.answer);
-      console.log(peerConnection);
-      clearInterval(polling);
-    } else {
-      console.log('peer connection is undefined');
     }
   };
   signalingChannel.onclose = () => {
@@ -58,8 +50,8 @@ onMounted(() => {
     audio: false,
     video: {
       facingMode: 'environment',
-      width: { ideal: 1280 },
-      height: { ideal: 720 },
+      width: { ideal: 720 },
+      height: { ideal: 1280 },
     },
   };
 
@@ -116,7 +108,6 @@ async function makeCall() {
     console.error('Local stream not available when trying to make call!');
     return; // Cannot make call without stream
   }
-
 
   const offer = await peerConnection.createOffer();
   await peerConnection.setLocalDescription(offer);
